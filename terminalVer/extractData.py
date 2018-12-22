@@ -1,4 +1,6 @@
 
+import json
+import random
 '''
 *********************************************************************************
 # part 0 -- test part
@@ -22,8 +24,6 @@ def freqIdiomTest():
 # part 1 -- create pairs
 *********************************************************************************
 '''
-
-import json
 
 def createMap(idioms):
     word2idioms = {}
@@ -115,6 +115,7 @@ class IdiomPair():
         self.secondWord = secondWord
         self.cpos = -1
         self.rpos = -1
+        self.eightWords = None
         self.cacuPos()
 
     def cacuPos(self):
@@ -128,17 +129,25 @@ class IdiomPair():
                 break
         pass
     
-    def setData(self, firDeri, firExpl, firPy, secDeri, secExpl, secPy):
+    def setData(self, firDeri, firExpl, firPy, secDeri, secExpl, secPy, eightWords):
         self.first  = Idiom(self.firstWord, firDeri, firExpl, firPy)
         self.second = Idiom(self.secondWord, secDeri, secExpl, secPy)
+        self.eightWords = eightWords
         return self
     
     def toStr(self):
         spli = "\t"
         fir = self.first
         sec = self.second
-        res = self.keyWord + spli + fir.desc + spli + fir.deri + spli + fir.expl + spli + fir.pinyin + "\n"
-        res += str(self.rpos) + "," + str(self.cpos) + spli + sec.desc + spli +sec.deri + spli + sec.expl + spli + sec.pinyin + "\n"
+        pos = "(" + str(self.rpos) + "," + str(self.cpos) + ")"
+        wordstr = ""
+        for word in self.eightWords:
+            wordstr += word
+            wordstr += ","
+        wordstr = wordstr.strip(",")
+        res = self.keyWord + spli + pos + spli + wordstr
+        res += spli +  fir.desc + spli + fir.deri + spli + fir.expl + spli + fir.pinyin + "\n"
+        res += 3 * spli + sec.desc + spli +sec.deri + spli + sec.expl + spli + sec.pinyin + "\n"
         return res
 
 
@@ -160,24 +169,44 @@ def readIdiomDict():
     return idiomDict
 
 def readPairData():
-    with open("terminalVer/data.out", "r", encoding="UTF-8") as fp:
+    with open("terminalVer/idiomPairRaw.txt", "r", encoding="UTF-8") as fp:
         idiomPairsRaw = [(s.strip("\n").split(',')) for s in fp.readlines()]
         idiomPairs = []
         for rawPair in idiomPairsRaw:
             idiomPairs.append(IdiomPair(rawPair[0], firstWord=rawPair[1], secondWord=rawPair[2]))
     return idiomPairs
 
-def createCompleteData(idiomDict, idiomPairs):
+def readWordsList():
+    with open("terminalVer/freqWords.txt", "r", encoding="UTF-8") as fp:
+        wordsList = [s.strip("\n") for s in fp.readlines()]
+    return wordsList
+
+def getEightWords(keyWord, wordsList):
+    rinds = random.sample(wordsList, 8)
+    eightWords = []
+    n = 0
+    for x in rinds:
+        if x != keyWord:
+            eightWords.append(x)
+            n += 1
+        if n == 7:
+            break
+    eightWords.append(keyWord)
+    random.shuffle(eightWords)
+    return eightWords
+
+def createCompleteData(idiomDict, idiomPairs, wordsList):
     compPairData = []
     for p in idiomPairs:
         fd = idiomDict[p.firstWord]
         sd = idiomDict[p.secondWord]
-        compPairData.append(p.setData(fd["deri"], fd["expl"], fd["pinyin"], sd["deri"], sd["expl"], sd["pinyin"]))
+        compPairData.append(p.setData(fd["deri"], fd["expl"], fd["pinyin"], sd["deri"], sd["expl"], sd["pinyin"], getEightWords(p.keyWord, wordsList)))
     return compPairData
 
 def completeDataWork():
-    compPairData = createCompleteData(readIdiomDict(), readPairData())
-    with open("terminalVer/test.out", "w", encoding="UTF-8") as fp:
+    compPairData = createCompleteData(readIdiomDict(), readPairData(), readWordsList())
+    random.shuffle(compPairData)
+    with open("terminalVer/idiomPairTxt_word_deri_expl_py.out", "w", encoding="UTF-8") as fp:
         for i in range(0, len(compPairData)):
             tmpPair = compPairData[i]
             fp.write(tmpPair.toStr())
@@ -207,3 +236,26 @@ def cleanData():
         cleandFp.close()
 
 # cleanData()
+
+
+'''
+*********************************************************************************
+# part 4 -- create words data
+*********************************************************************************
+'''
+
+def createWordsFromFreqIdioms():
+    words = None
+    with open("terminalVer/freqIdioms.txt", "r", encoding="UTF-8") as fp:
+        wordsSet = set()
+        idioms = [s.strip("\n") for s in fp.readlines()]
+        for idiom in idioms:
+            for x in idiom:
+                wordsSet.add(x)
+        words = [x+"\n" for x in wordsSet]
+    with open("terminalVer/freqWords.txt", "w", encoding="UTF-8") as fp:
+        fp.writelines(words)
+
+# createWordsFromFreqIdioms()
+    
+        
