@@ -1,24 +1,7 @@
 import threading
-
-
-class Idiom():
-
-    def __init__(self, desc=None, d=None, e=None, p=None):
-        self.desc = desc
-        self.deri = d
-        self.expl = e
-        self.pinyin = p
-
-
-class IdiomPair():
-
-    def __init__(self, keyWord=None, rpos=0, cpos=0, eightWords=None, firstIdiom=None, secondIdiom=None):
-        self.keyWord = keyWord
-        self.cpos = cpos
-        self.rpos = rpos
-        self.eightWords = eightWords
-        self.first = firstIdiom
-        self.second = secondIdiom
+import requests
+import random
+from IdiomPair import Idiom, IdiomPair
 
 
 class IdiomGameClient():
@@ -33,6 +16,9 @@ class IdiomGameClient():
         self.ROUND_DATA_REFRESHED = False
         self.ROUND_DATA = IdiomPair()
         self.ROUND_NUM = 1
+        self.ADDR_HOST = "http://127.0.0.1:8000"
+        self.ADDR_GET_ROUND_DATA = self.ADDR_HOST + "/getRoundData"
+        self.ADDR_GET_USER_RND = self.ADDR_HOST + "/getUserRound"
 
     def start(self):
         while (True):
@@ -89,29 +75,6 @@ class IdiomGameClient():
                         tmps += "  "
             tmps += "\n"
         print(tmps)
-
-        # construct matrix
-        # matrix = []
-        # for i in range(0, 4):
-        #     matrix.append([])
-        #     tmpn = 7
-        #     if i == roundData.rpos:
-        #         tmpn = 5
-        #     while tmpn > 0:
-        #         matrix[i].append(' ')
-        #         tmpn -= 1
-        # for i in range(0, 4):
-        #     if i != cpos:
-        #         matrix[rpos][i] = fw[i]
-        #     if i != rpos:
-        #         matrix[i][cpos * 2] = sw[i]
-        # matrix[rpos][cpos * 2] = matrix[rpos][cpos * 2 + 1] = ' '
-        # tmps = ""
-        # for i in range(0, len(matrix)):
-        #     for j in range(0, len(matrix[i])):
-        #         tmps += matrix[i][j]
-        #     tmps += "\n"
-        # print(tmps)
         tmps = ""
         for x in roundData.eightWords:
             tmps += x + " "
@@ -205,11 +168,36 @@ class IdiomGameClient():
             rpos = int(posli[0])
             cpos = int(posli[1])
             eightWords = lineli1[2].split(',')
+            random.shuffle(eightWords)
             first = Idiom(lineli1[3], lineli1[4], lineli1[5], lineli1[6])
             second = Idiom(lineli2[0], lineli2[1], lineli2[2], lineli2[3])
             self.ROUND_DATA = IdiomPair(
                 lineli1[0], rpos, cpos, eightWords, first, second)
             self.ROUND_DATA_REFRESHED = True
+
+    def getRoundHttp(self, roundNum):
+        r = requests.get(self.ADDR_GET_ROUND_DATA, params={'roundNum': str(roundNum)})
+        code = str(r.status_code)
+        if int(code) == 200:
+            a = len(r.raw.data)
+            con = r.content
+            # print(str(con, encoding="utf-8"))
+            ss = str(con, "utf-8").split('\n')
+            line1 = ss[0]
+            line2 = ss[1]
+            lineli1 = line1.split("\t")
+            lineli2 = line2.split("\t")
+            posli = lineli1[1].split(',')
+            rpos = int(posli[0])
+            cpos = int(posli[1])
+            eightWords = lineli1[2].split(',')
+            first = Idiom(lineli1[3], lineli1[4], lineli1[5], lineli1[6])
+            second = Idiom(lineli2[0], lineli2[1], lineli2[2], lineli2[3])
+            self.ROUND_DATA = IdiomPair(
+                lineli1[0], rpos, cpos, eightWords, first, second)
+            self.ROUND_DATA_REFRESHED = True
+        else:
+            print("Network Error, Status Code: " + code)
 
     def getRoundDataAsync(self, roundNum):
         # new thread get data
