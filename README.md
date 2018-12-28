@@ -23,4 +23,10 @@ A B C D E F G H
 - Android版  
 - 微信小游戏
 
+### 目录说明
+> **document** -- 存放相关设计文档  
+> **freshGeneratorTest** -- 用来生成格式化的成语数据的代码  
+> **generatedData** -- 生成的数据，包括格式化后的成语数据以及一些其他的暂时无用的数据  
+> **terminalVer** -- 一个离线的终端版本，采用Python编写  
+> **webVer** -- 网页版本，目前正在开发
 

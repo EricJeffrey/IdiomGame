@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+    <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" /> -->
+    <script>
+        var CODE_TASK_SUCCESS = "101", CODE_TASK_FAIL = "-101";
+        function doLogin() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            var errorInfoDiv = document.getElementById("errorinfo");
+            if (username.length == 0 || password.length == 0) {
+                errorInfoDiv.innerText = "请输入用户名和密码";
+                return -1;
+            }
+            else {
+                errorInfoDiv.innerText = null;
+                $.post("/idiomgamelogin", {
+                    username: username,
+                    password: password
+                }, function (data, textstatus, jqxhr) {
+                    if (data === CODE_TASK_SUCCESS) {
+                        window.location = "/idiomgamestart";
+                    } else if (data === CODE_TASK_FAIL) {
+                        errorInfoDiv.innerText = "用户或密码错误";
+                    }
+                })
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <form action="/idiomgame" method="POST">
+        <div>
+            用户名<input type="text" id="username" name="username">
+        </div>
+        <div>
+            密码<input type="password" id="password" name="password">
+        </div>
+        <div id="errorinfo">
+
+        </div>
+        <div>
+            <input type="button" value="登录" onclick="doLogin()">
+        </div>
+    </form>
+</body>
+
+</html>

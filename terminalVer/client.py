@@ -59,7 +59,7 @@ class IdiomGameClient():
         rpos = roundData.rpos
         cpos = roundData.cpos
         # set data into it
-        tmps = ""
+        tmps = "\n"
         for i in range(4):
             if i == rpos:
                 for j in range(4):
@@ -83,7 +83,7 @@ class IdiomGameClient():
     def checkInputAnwser(self):
         while True:
             userSelectNum = input(
-                "\nInput word number (from 1) and press enter, -1 to Exit: ")
+                "\n输入正确答案序号（从1开始）, 输入-1退出: ")
             try:
                 ind = int(userSelectNum) - 1
                 rndData = self.ROUND_DATA
@@ -91,13 +91,13 @@ class IdiomGameClient():
                     if rndData.eightWords[ind] == rndData.keyWord:
                         return self.CODE_WIN
                     else:
-                        print("\nWrong Anwser emmmm, Try Again~\n")
+                        print("\n错了~\n")
                 elif ind == -2:
                     return self.CODE_EXIT
                 else:
-                    print("\nWrong Input emmmm, Try Again~\n")
+                    print("\n错了~\n")
             except ValueError:
-                print("\nWrong Input emmmm, Try Again~\n")
+                print("\n输入有误~\n")
 
     def showIdiomDetail(self):
         rndData = self.ROUND_DATA
@@ -111,13 +111,13 @@ class IdiomGameClient():
             lf + expl + first.expl + lf + piny + first.pinyin
         secs = second.desc + ":" + lf + deri + second.deri + \
             lf + expl + second.expl + lf + piny + second.pinyin
-        print(firs + lf + secs)
+        print(lf + firs + lf + secs)
         pass
 
     def checkInputAfterDetail(self):
         while True:
             inputAfterDetail = input(
-                "\nInput 1 to Next Round, -1 to Exit: ")
+                "\n1 继续，-1 退出: ")
             try:
                 num = int(inputAfterDetail)
                 if num == 1:
@@ -131,7 +131,7 @@ class IdiomGameClient():
 
     def winWork(self):
         numAfterWin = input(
-            "Congratulations! You have won this round.\nInput 1 to Next Round, 2 Show Idiom Detail -1 to Exit: ")
+            "选对了~.\n1 下一关, 2 查看释义， -1 退出: ")
         while(True):
             try:
                 num = int(numAfterWin)
@@ -142,10 +142,10 @@ class IdiomGameClient():
                 elif num == -1:
                     return self.CODE_EXIT
                 else:
-                    print("\nWrong Input, Try Again~\n")
+                    print("\n输错啦~\n")
                     numAfterWin = input()
             except ValueError:
-                print("\nWrong Input, Try Again~\n")
+                print("\n输错啦~\n")
                 numAfterWin = input()
                 continue
 
