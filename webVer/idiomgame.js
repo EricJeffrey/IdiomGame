@@ -1,7 +1,8 @@
 
 var gtbody, atbody, dtbody;
 var ansbtn;
-var ansShown = false, detailShown = false;
+var windialogdiv;
+var ansShown = false, detailShown = false, winDialogShown = false;
 
 var roundNum;
 var rounddata;
@@ -19,8 +20,9 @@ function clearOldData(gametbody, anstbody, detailtbody) {
         for (var j = childnodes.length - 1; j > 0; j--)
             tmpbody.removeChild(childnodes[j]);
     }
-    document.getElementById("detailtable").setAttribute("style", "visibility:hidden");
-    ansShown = detailShown = false;
+    windialogdiv.style.visibility = "hidden";
+    detailtbody.style.visibility = "hidden";
+    ansShown = detailShown = winDialogShown = false;
 }
 
 // pri 添加一个2*4的表格展示候选字
@@ -78,7 +80,9 @@ function refreshRoundData() {
     if (atbody == null)
         atbody = document.getElementById("anstbody");
     if (dtbody == null)
-        dtbody = document.getElementById("detailtbody")
+        dtbody = document.getElementById("detailtbody");
+    if (windialogdiv == null)
+        windialogdiv = document.getElementById("windialogdiv");
     clearOldData(gtbody, atbody, dtbody);
     var rpos = rounddata.rpos, cpos = rounddata.cpos;
     var fw = rounddata.first.desc, sw = rounddata.second.desc;
@@ -87,10 +91,28 @@ function refreshRoundData() {
     priShowAnsData(eightWords, atbody);
 }
 
+// 更改通关对话框可见性
+function toggleWinDialog() {
+    bottomdiv = document.getElementById("bottom_div");
+    if (winDialogShown) {
+        windialogdiv.style.visibility = "hidden";
+        bottomdiv.style.filter = "none";
+        bottomdiv.style.pointerEvents = "all";
+    } else {
+        windialogdiv.style.visibility = "visible";
+        bottomdiv.style.filter = "blur(2px)";
+        bottomdiv.style.pointerEvents = "none";
+    }
+    winDialogShown = !winDialogShown;
+}
+
 // 检查答案是否正确
 function checkAnwserListener(event) {
     if (event.target.innerText == rounddata.keyword) {
-        showAns();
+        if (!ansShown) {
+            showAns();
+            toggleWinDialog();
+        }
     }
     else {
         alert("答错了");
@@ -123,13 +145,14 @@ function getNextRoundData(success) {
 
 // 显示网络错误
 function showNetworkError() {
-    // todo 超时
+    alert("连接超时，请检查网络连接并刷新页面");
 }
 
 // 显示答案
 function showAns() {
     if (ansShown)
         return;
+    document.getElementById("nextrndbtn").style.display = "initial";
     ansShown = true;
     ansbtn.innerText = rounddata.keyword;
 }
@@ -138,9 +161,11 @@ function showAns() {
 function showIdiomDetail(dtbody) {
     if (detailShown)
         return;
+    if (winDialogShown)
+        toggleWinDialog();
     detailShown = true;
     showAns();
-    document.getElementById("detailtable").setAttribute("style", "visibility:visible");
+    dtbody.style.visibility = "visible";
     for (var i = 0; i < 2; i++) {
         var tmpidiom = rounddata.first;
         if (i == 1)
